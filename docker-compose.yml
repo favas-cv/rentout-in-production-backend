@@ -1,0 +1,82 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: rentout_postgres
+    restart: always
+    env_file:
+      - .env.production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: rentout_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  django:
+    build:
+      context: ./rentout_core/config
+      dockerfile: docker/django/Dockerfile
+    container_name: rentout_django
+    restart: always
+    env_file:
+      - .env.production
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - postgres
+      - redis
+    expose:
+      - "8000"
+
+  celery:
+    build:
+      context: ./rentout_core/config
+      dockerfile: docker/celery/Dockerfile
+    container_name: rentout_celery
+    command: sh -c "celery -A config worker -B -l info"
+    restart: always
+    env_file:
+      - .env.production
+    depends_on:
+      - postgres
+      - redis
+
+  fastapi:
+    build:
+      context: ./aichatbot-service
+      dockerfile: Dockerfile
+    container_name: rentout_fastapi
+    restart: always
+    env_file:
+      - .env.production
+    volumes:
+      - chroma_data:/app/chroma_db
+    ports:
+      - "8001:8001"
+
+  nginx:
+    build:
+      context: ./rentout_core/config/docker/nginx
+    container_name: rentout_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - django
+      - fastapi
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  chroma_data:

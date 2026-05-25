@@ -1,0 +1,11 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+postgres_data/
+chroma_db/
+media/
+staticfiles/
+venv/
+rentout_core/config/config/firebase/*.json
+.vscode/

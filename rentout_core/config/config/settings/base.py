@@ -1,0 +1,224 @@
+import os
+from decouple import config
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+SECRET_KEY = config("SECRET_KEY")
+
+
+
+INSTALLED_APPS = [
+    'daphne',
+    'channels',
+    'corsheaders',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django_filters',
+    'drf_yasg',
+    'utils',
+    'kyc',
+    'chat',
+    'chatbot',
+    'paymentsetup', 
+    'rest_framework',
+    'accounts',
+    'address',
+    'products',
+    'cart',
+    'room',
+    'booking',
+    'ownerdashboard',
+    'admindashboard',
+    'notification',
+    'rest_framework_simplejwt.token_blacklist',
+]
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+
+
+ROOT_URLCONF = 'config.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+ASGI_APPLICATION = 'config.asgi.application'
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    }
+}
+
+# Database
+# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
+        "PORT": config("DB_PORT"),
+    }
+}
+
+
+# Password validation
+# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+# Internationalization
+# https://docs.djangoproject.com/en/6.0/topics/i18n/
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+
+USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/6.0/howto/static-files/
+
+STATIC_URL = 'static/'
+
+from datetime import timedelta
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+        'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        # 'accounts.permissions.IsActiveUsers',
+    ],
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
+    'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+        
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'BLACKLIST_AFTER_ROTATION':False,
+    "ROTATE_REFRESH_TOKENS": False,
+}
+
+AUTH_USER_MODEL ='accounts.User'
+
+ #for playground use 
+GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID")
+
+
+import cloudinary
+import cloudinary.uploader
+
+cloudinary.config(
+    cloud_name=config("CLOUDINARY_CLOUD_NAME"),
+    api_key=config("CLOUDINARY_API_KEY"),
+    api_secret=config("CLOUDINARY_API_SECRET")
+)
+
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": config("REDIS_CACHE_URL"),  # different DB from celery if possible
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+CELERY_BROKER_URL = config("REDIS_URL")
+CELERY_RESULT_BACKEND =config("REDIS_URL")
+
+CELERY_BEAT_SCHEDULE = {
+    'delete-expired-reservations': {
+        'task': 'booking.tasks.delete_expired_reservations',
+        'schedule': 300.0,  # every 5 minutes
+    },
+}
+
+# EMAIL CONFIG 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_ADMIN_USER = config("EMAIL_ADMIN_USER")
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+RAZORPAY_KEY_ID = config("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = config("RAZORPAY_KEY_SECRET")
+
+
+#chatbot
+
+GROQ_API_KEY=config('GROQ_API_KEY')
+AI_SERVICE_URL = config("AI_SERVICE_URL")
+
+
+from config.firebase import *

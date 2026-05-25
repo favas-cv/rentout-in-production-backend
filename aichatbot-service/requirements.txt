@@ -1,0 +1,31 @@
+fastapi
+uvicorn
+gunicorn
+
+langchain-core
+langchain-google-genai
+langchain-groq
+
+# chromadb
+# langchain-chroma
+chromadb==0.5.23
+langchain-chroma==0.1.4
+
+google-genai
+
+psycopg2-binary
+SQLAlchemy
+
+python-dotenv
+
+redis
+celery
+
+httpx
+
+pydantic
+pydantic-settings
+
+python-dateutil
+
+PyYAML
